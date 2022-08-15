@@ -1,9 +1,11 @@
 <?php 
-require 'config.php';
 
+function fdb_config_location(){
+	return dirname(__FILE__).'/db';
+}
 
-function _fdb_get_checksum(String $collection,String $key){
-	$file = fdb_config_location().'/_sys/_checksum/'.$collection.'/'.$key;
+function _fdb_get_checksum(String $db_location,String $collection,String $key){
+	$file = $db_location.'/_sys/_checksum/'.$collection.'/'.$key;
 
 	if(file_exists($file)){
 
@@ -19,8 +21,8 @@ function _fdb_get_checksum(String $collection,String $key){
 
 }
 
-function _fdb_set_checksum(String $collection,String $key){
-	$dir_col = fdb_config_location().'/_sys/_checksum/'.$collection;
+function _fdb_set_checksum(String $db_location,String $collection,String $key){
+	$dir_col = $db_location.'/_sys/_checksum/'.$collection;
 
 	if(!file_exists($dir_col)){
 		mkdir($dir_col);
@@ -28,7 +30,7 @@ function _fdb_set_checksum(String $collection,String $key){
 
 	$file = $dir_col.'/'.$key;
 
-	$curr_checksum = _fdb_get_checksum($collection,$key);
+	$curr_checksum = _fdb_get_checksum($db_location,$collection,$key);
 
 	if($curr_checksum['status'] == 'error'){
 
@@ -52,11 +54,11 @@ function _fdb_set_checksum(String $collection,String $key){
 
 }
 
-function _fdb_del_checksum(String $collection,String $key){
-	$file = fdb_config_location().'/_sys/_checksum/'.$collection.'/'.$key;
+function _fdb_del_checksum(String $db_location,String $collection,String $key){
+	$file = $db_location.'/_sys/_checksum/'.$collection.'/'.$key;
 	unlink($file);
 
-	$checksum = _fdb_get_checksum($collection,$key);
+	$checksum = _fdb_get_checksum($db_location,$collection,$key);
 	if($checksum['status'] == 'error'){
 		return array('status' => 'ok');
 	}
@@ -65,22 +67,22 @@ function _fdb_del_checksum(String $collection,String $key){
 }
 
 
-function fdb_set(String $collection,String $key,Array $data,String $checksum){
+function fdb_set(String $db_location,String $collection,String $key,Array $data,String $checksum){
 
-	$curr_checksum = _fdb_get_checksum($collection,$key);
+	$curr_checksum = _fdb_get_checksum($db_location,$collection,$key);
 	if($curr_checksum['status'] != "ok"){
-		$curr_checksum = _fdb_set_checksum($collection,$key);
+		$curr_checksum = _fdb_set_checksum($db_location,$collection,$key);
 	}
 
 	if($checksum != $curr_checksum['data']){
 		return array('status' => 'error', 'messg' => 'checksum missmatch');
 	}
 
-	return fdb_set_force($collection,$key,$data);	
+	return fdb_set_force($db_location,$collection,$key,$data);	
 }
 
-function fdb_set_force(String $collection,String $key,Array $data){
-	$dir_col = fdb_config_location().'/data/'.$collection;
+function fdb_set_force(String $db_location,String $collection,String $key,Array $data){
+	$dir_col = $db_location.'/data/'.$collection;
 	$file = $dir_col.'/'.$key;
 
 	if(!file_exists($dir_col)){
@@ -95,14 +97,14 @@ function fdb_set_force(String $collection,String $key,Array $data){
 
 	file_put_contents($file,$data_json);
 
-	$curr_checksum = _fdb_set_checksum($collection,$key);
+	$curr_checksum = _fdb_set_checksum($db_location,$collection,$key);
 
 	return array('status' => 'ok', 'data' => $curr_checksum['data']);
 
 }
 
-function fdb_get(String $collection,String $key){
-	$dir_col = fdb_config_location().'/data/'.$collection;
+function fdb_get(String $db_location,String $collection,String $key){
+	$dir_col = $db_location.'/data/'.$collection;
 	$file = $dir_col.'/'.$key;
 
 	if(!file_exists($file)){
@@ -113,28 +115,28 @@ function fdb_get(String $collection,String $key){
 	$data = json_decode($json_data,TRUE);
 	$data['_id'] = $key;
 
-	$curr_checksum = _fdb_get_checksum($collection,$key);
+	$curr_checksum = _fdb_get_checksum($db_location,$collection,$key);
 	$data['_checksum'] = $curr_checksum['data'];
 
 	return array('status' => 'ok', 'data' => $data);
 
 }
 
-function fdb_del(String $collection,String $key,String $checksum){
-	$curr_checksum = _fdb_get_checksum($collection,$key);
+function fdb_del(String $db_location,String $collection,String $key,String $checksum){
+	$curr_checksum = _fdb_get_checksum($db_location,$collection,$key);
 	if($curr_checksum['status'] != "ok"){
-		$curr_checksum = _fdb_set_checksum($collection,$key);
+		$curr_checksum = _fdb_set_checksum($db_location,$collection,$key);
 	}
 
 	if($checksum != $curr_checksum['data']){
 		return array('status' => 'error', 'messg' => 'checksum missmatch');
 	}
 
-	return fdb_del_force($collection,$key);
+	return fdb_del_force($db_location,$collection,$key);
 }	
 
-function fdb_del_force(String $collection,String $key){
-	$dir_col = fdb_config_location().'/data/'.$collection;
+function fdb_del_force(String $db_location,String $collection,String $key){
+	$dir_col = $db_location.'/data/'.$collection;
 	$file = $dir_col.'/'.$key;
 
 	if(!file_exists($file)){
@@ -143,9 +145,9 @@ function fdb_del_force(String $collection,String $key){
 
 	unlink($file);
 
-	$result = fdb_get($collection,$key);
+	$result = fdb_get($db_location,$collection,$key);
 	if($result['status'] == 'error'){
-		$checksum = _fdb_del_checksum($collection,$key);
+		$checksum = _fdb_del_checksum($db_location,$collection,$key);
 		if($checksum['status'] == 'ok'){
 			return array('status' => 'ok');
 		}else{
@@ -159,8 +161,8 @@ function fdb_del_force(String $collection,String $key){
 
 
 
-function fdb_get_all(String $collection){
-	$dir_col = fdb_config_location().'/data/'.$collection;
+function fdb_get_all(String $db_location,String $collection){
+	$dir_col = $db_location.'/data/'.$collection;
 
 	if(!file_exists($dir_col)){
 		return array('status' => 'error', 'messg' => 'collection not found');
@@ -172,7 +174,7 @@ function fdb_get_all(String $collection){
 
 	foreach($files as $file){
 		$file = basename($file);
-		$d = fdb_get($collection,$file);
+		$d = fdb_get($db_location,$collection,$file);
 		$data[] = $d['data'];
 	}
 
@@ -180,7 +182,7 @@ function fdb_get_all(String $collection){
 
 }
 
-function fdb_get_by(String $collection,String $key,String $operator,String $value){
+function fdb_get_by(String $db_location,String $collection,String $key,String $operator,String $value){
 
 	$operator_valid = array("=",">",">=","<","<=","!=","contains");
 	if(!in_array($operator,$operator_valid)){
@@ -189,7 +191,7 @@ function fdb_get_by(String $collection,String $key,String $operator,String $valu
 
 	$data = array();
 
-	$files = fdb_get_all($collection);
+	$files = fdb_get_all($db_location,$collection);
 	if($files['status'] == 'error'){
 		return $files;
 	}
