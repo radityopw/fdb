@@ -1,6 +1,4 @@
 <?php 
-require_once 'fdb.php';
-
 if(count($argv) != 2){
 	exit("invalid parameter");
 }
