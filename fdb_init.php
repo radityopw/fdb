@@ -1,7 +1,11 @@
 <?php 
-require_once 'config.php';
+require_once 'fdb.php';
 
-$dir = fdb_config_location();
+if(count($argv) != 2){
+	exit("invalid parameter");
+}
+
+$dir = $argv[1];
 
 if(!file_exists($dir)){
 	mkdir($dir);
