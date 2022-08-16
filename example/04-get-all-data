@@ -1,0 +1,15 @@
+#!/bin/php
+<?php 
+
+require '../fdb.php';
+
+$db = '/tmp/db';
+$collection = 'users';
+
+$all_data = fdb_get_all($db,$collection);
+
+foreach($all_data as $data){
+	echo print_r($data,TRUE);
+	echo "\n";
+}
+

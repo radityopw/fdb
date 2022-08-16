@@ -1,0 +1,20 @@
+#!/bin/php
+<?php
+
+require 'fdb.php';
+
+
+if(count($argv) != 2){
+	echo "invalid parameter\n";
+	echo "./fdb_init <db_dir>\n";
+	exit(1);
+}
+
+$dir = $argv[1];
+
+if(file_exists($dir)){
+	echo "directory not empty!, aborted\n";
+	exit(1);
+}
+
+_fdb_init($dir);

@@ -1,0 +1,46 @@
+#!/bin/php
+<?php
+
+require '../fdb.php';
+
+$db = '/tmp/db';
+$collection = 'users';
+$key = 'radityopw';
+
+$checksum = -1;
+
+//wrong way ! will return error
+
+$data = array();
+$data['username'] = 'radityopw';
+$data['name'] = 'radityo prasetianto wibowo';
+$data['role'] = 'administrator';
+$date['sex'] = 'male';
+
+
+$result = fdb_set($db,$collection,$key,$data,$checksum);
+
+echo print_r($result,TRUE);
+echo "\n";
+
+// right way !
+// 1. get data first 
+// 2. get the checksum 
+// 3. update data with checksum
+
+
+$curr_data = fdb_get($db,$collection,$key);
+if($curr_data['status'] == 'ok'){
+	echo print_r($curr_data,TRUE);
+	echo "\n";
+
+	$data = $curr_data['data'];
+	$data['sex'] = 'male';
+
+	$checksum = $curr_data['data']['_checksum'];
+
+	$result = fdb_set($db,$collection,$key,$data,$checksum);
+
+	echo print_r($result,TRUE);
+	echo "\n";
+}

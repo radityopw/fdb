@@ -1,0 +1,18 @@
+#!/bin/php
+<?php 
+
+require '../fdb.php';
+
+$db = '/tmp/db';
+$collection = 'users';
+$key = 'name';
+$operator = 'contains';
+$value = 'radityo';
+
+$all_data = fdb_get_by($db,$collection,$key,$operator,$value);
+
+foreach($all_data as $data){
+	echo print_r($data,TRUE);
+	echo "\n";
+}
+

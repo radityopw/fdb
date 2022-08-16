@@ -1,0 +1,19 @@
+#!/bin/php
+<?php 
+
+require '../fdb.php';
+
+$db = '/tmp/db';
+$collection = 'users';
+$key = 'radityopw';
+
+$checksum = -1;
+
+$radityopw = fdb_get($db,$collection,$key);
+if($radityopw['status'] == 'ok'){
+	$checksum = $radityopw['data']['_checksum'];
+	$result = fdb_del($db,$collection,$key,$checksum);
+
+	echo print_r($result,TRUE);
+	echo "\n";
+}

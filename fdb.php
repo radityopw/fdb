@@ -1,7 +1,29 @@
-<?php 
+<?php
 
-function fdb_config_location(){
-	return dirname(__FILE__).'/db';
+function _fdb_init(String $dir){
+
+	if(!file_exists($dir)){
+		mkdir($dir);
+	}
+
+	$sys_dir = $dir.'/_sys';
+
+	if(!file_exists($sys_dir)){
+		mkdir($sys_dir);
+	}
+
+	$checksum_dir = $sys_dir.'/_checksum';
+
+	if(!file_exists($checksum_dir)){
+		mkdir($checksum_dir);
+	}
+
+	$data_dir = $dir.'/data';
+
+	if(!file_exists($data_dir)){
+		mkdir($data_dir);
+	}
+
 }
 
 function _fdb_get_checksum(String $db_location,String $collection,String $key){
@@ -177,8 +199,14 @@ function fdb_get_all(String $db_location,String $collection){
 		$d = fdb_get($db_location,$collection,$file);
 		$data[] = $d['data'];
 	}
+	if(count($data) > 0){
 
-	return array('status' => 'ok', 'data' => $data);
+		return array('status' => 'ok', 'data' =>$data);
+
+	}
+
+	return array('status' => 'warning', 'data' => $data, 'messg' => 'empty result');
+
 
 }
 

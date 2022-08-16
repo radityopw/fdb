@@ -1,0 +1,16 @@
+#!/bin/php
+<?php
+require('../fdb.php');
+
+//make sure u run fdb_init /tmp/db first !
+
+$db = '/tmp/db';
+$collection = 'users';
+$data = array();
+
+$data['username'] = 'radityopw';
+$data['name'] = 'radityo prasetianto wibowo';
+$data['role'] = 'administrator';
+
+fdb_set_force($db,$collection,'radityopw',$data);
+

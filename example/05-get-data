@@ -1,0 +1,16 @@
+#!/bin/php
+<?php 
+
+require '../fdb.php';
+
+$db = '/tmp/db';
+$collection = 'users';
+$key = 'radityopw';
+
+$all_data = fdb_get($db,$collection,$key);
+
+foreach($all_data as $data){
+	echo print_r($data,TRUE);
+	echo "\n";
+}
+
